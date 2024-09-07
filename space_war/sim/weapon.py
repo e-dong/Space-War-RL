@@ -58,7 +58,7 @@ class Phaser(BaseWeapon):
     active: bool
     start_time: int
     ship_pos: tuple[float, float]
-    coords: list[tuple[float, float]]
+    coords: list[tuple[tuple[float,float], tuple[float, float]]]
 
     def __init__(self, source_ship) -> None:
         super().__init__(duration=PHASER_MAX_FLIGHT_MS)
@@ -72,32 +72,8 @@ class Phaser(BaseWeapon):
             "end_pos": [],
             "dist": [],
         }
-        self.coords = []
+        self.coords  = []
 
-    def _draw_phaser(self, ship_pos):
-        """Draws coordinates for the phaser based on coordinates set in
-        self._detect_hit. This is visible to the player.
-
-        """
-
-        # Calculate change in position since calculation
-        # and translate all the lines
-        (old_startx, old_starty), _ = self.coords[-1]
-        deltax = ship_pos[0] - old_startx
-        deltay = ship_pos[1] - old_starty
-        for (startx, starty), (endx, endy) in self.coords:
-            startx += deltax
-            starty += deltay
-            endx += deltax
-            endy += deltay
-
-            pygame.draw.line(
-                self.image,
-                "white",
-                start_pos=(startx, starty),
-                end_pos=(endx, endy),
-                width=PHASER_WIDTH,
-            )
 
     def _detect_hit(
         self,
@@ -162,6 +138,31 @@ class Phaser(BaseWeapon):
 
             self.active = False
 
+    def _draw_phaser(self, ship_pos):
+        """Draws coordinates for the phaser based on coordinates set in
+        self._detect_hit. This is visible to the player.
+
+        """
+        # Calculate change in position since calculation
+        # and translate all the lines
+        if self.coords:
+            (old_startx, old_starty), _ = self.coords[-1]
+            deltax = ship_pos[0] - old_startx
+            deltay = ship_pos[1] - old_starty
+            for (startx, starty), (endx, endy) in self.coords:
+                startx += deltax
+                starty += deltay
+                endx += deltax
+                endy += deltay
+                if self.image:
+                    pygame.draw.line(
+                            self.image,
+                            "white",
+                            start_pos=(startx, starty),
+                            end_pos=(endx, endy),
+                            width=PHASER_WIDTH,
+                            )
+
     def _update_hit_detector_rects(self, ship_pos, ship_ang):
         """Creates hit detection rectangles for the phasers. These are
         invisible to the player.
@@ -172,9 +173,9 @@ class Phaser(BaseWeapon):
         # TODO: Make screen wrap around logic iterative
 
         target_pos = (
-            ship_pos[0] + PHASER_LENGTH * math.cos(ship_ang * math.pi / 180),
-            ship_pos[1] + PHASER_LENGTH * math.sin(ship_ang * math.pi / 180),
-        )
+                ship_pos[0] + PHASER_LENGTH * math.cos(ship_ang * math.pi / 180),
+                ship_pos[1] + PHASER_LENGTH * math.sin(ship_ang * math.pi / 180),
+                )
 
         x_pos, y_pos = target_pos
         new_x_pos, new_y_pos = ship_pos
@@ -200,39 +201,40 @@ class Phaser(BaseWeapon):
         target_pos = (x_pos, y_pos)
 
         # Remove old lines
-        self.image.fill("black")
+        if self.image:
+            self.image.fill("black")
 
-        # Use this rect to detect collisions
-        rect = pygame.draw.line(
-            self.image,
-            pygame.color.Color(0, 0, 0, 0),
-            ship_pos,
-            target_pos,
-            PHASER_WIDTH,
-        )
-        dist = math.dist(ship_pos, target_pos)
-        self.hit_detect_info["rect"].append(rect)
-        self.hit_detect_info["start_pos"].append(ship_pos)
-        self.hit_detect_info["end_pos"].append(target_pos)
-        self.hit_detect_info["dist"].append(dist)
-        remaining_dist = PHASER_LENGTH - dist
-        if math.floor(remaining_dist) > 0:
-            # Then create another rect to wraps around the screen
-            new_target_pos = (
-                new_x_pos + remaining_dist * math.cos(ship_ang * math.pi / 180),
-                new_y_pos + remaining_dist * math.sin(ship_ang * math.pi / 180),
-            )
-            new_rect = pygame.draw.line(
-                self.image,
-                pygame.color.Color(0, 0, 0, 0),
-                (new_x_pos, new_y_pos),
-                new_target_pos,
-                PHASER_WIDTH,
-            )
-            self.hit_detect_info["rect"].append(new_rect)
-            self.hit_detect_info["start_pos"].append((new_x_pos, new_y_pos))
-            self.hit_detect_info["end_pos"].append(new_target_pos)
-            self.hit_detect_info["dist"].append(remaining_dist)
+            # Use this rect to detect collisions
+            rect = pygame.draw.line(
+                    self.image,
+                    pygame.color.Color(0, 0, 0, 0),
+                    ship_pos,
+                    target_pos,
+                    PHASER_WIDTH,
+                    )
+            dist = math.dist(ship_pos, target_pos)
+            self.hit_detect_info["rect"].append(rect)
+            self.hit_detect_info["start_pos"].append(ship_pos)
+            self.hit_detect_info["end_pos"].append(target_pos)
+            self.hit_detect_info["dist"].append(dist)
+            remaining_dist = PHASER_LENGTH - dist
+            if math.floor(remaining_dist) > 0:
+                # Then create another rect to wraps around the screen
+                new_target_pos = (
+                        new_x_pos + remaining_dist * math.cos(ship_ang * math.pi / 180),
+                        new_y_pos + remaining_dist * math.sin(ship_ang * math.pi / 180),
+                        )
+                new_rect = pygame.draw.line(
+                        self.image,
+                        pygame.color.Color(0, 0, 0, 0),
+                        (new_x_pos, new_y_pos),
+                        new_target_pos,
+                        PHASER_WIDTH,
+                        )
+                self.hit_detect_info["rect"].append(new_rect)
+                self.hit_detect_info["start_pos"].append((new_x_pos, new_y_pos))
+                self.hit_detect_info["end_pos"].append(new_target_pos)
+                self.hit_detect_info["dist"].append(remaining_dist)
 
     def update(self, *args, **kwargs):
         super().update(*args, **kwargs)
@@ -250,20 +252,21 @@ class PhotonTorpedo(BaseWeapon, SpaceEntity):
         torpedo_y_pos = start_pos[1] + 36 * math.sin(start_ang * math.pi / 180)
         BaseWeapon.__init__(self, duration=TORPEDO_MAX_FLIGHT_MS)
         SpaceEntity.__init__(
-            self,
-            entity_type=SpaceEntityType.TORPEDO,
-            surf=surf,
-            start_pos=(torpedo_x_pos, torpedo_y_pos),
-            start_ang=start_ang,
-            start_vel=start_vel,
-        )
+                self,
+                entity_type=SpaceEntityType.TORPEDO,
+                surf=surf,
+                start_pos=(torpedo_x_pos, torpedo_y_pos),
+                start_ang=start_ang,
+                start_vel=start_vel,
+                )
 
         # Draw on the surface of what the torpedo looks like
-        pygame.draw.polygon(self.image, "white", [[5, 0], [3, 5], [7, 5]], 1)
-        pygame.draw.polygon(self.image, "white", [[0, 10], [3, 9], [3, 5]], 1)
-        pygame.draw.polygon(self.image, "white", [[7, 5], [7, 9], [11, 10]], 1)
-        pygame.draw.line(self.image, "white", (3, 9), (7, 9))
-        pygame.draw.line(self.image, "white", (5, 5), (5, 11))
+        if self.image:
+            pygame.draw.polygon(self.image, "white", [[5, 0], [3, 5], [7, 5]], 1)
+            pygame.draw.polygon(self.image, "white", [[0, 10], [3, 9], [3, 5]], 1)
+            pygame.draw.polygon(self.image, "white", [[7, 5], [7, 9], [11, 10]], 1)
+            pygame.draw.line(self.image, "white", (3, 9), (7, 9))
+            pygame.draw.line(self.image, "white", (5, 5), (5, 11))
         # Drawn like a christmas tree, so need to rotate it by 90 degrees.
         self.surf = pygame.transform.rotate(self.surf, -90)
 
@@ -279,6 +282,6 @@ class PhotonTorpedo(BaseWeapon, SpaceEntity):
 
         # group and collision management
         for sprite in kwargs["target_group"].sprites():
-            if sprite != self and self.rect.colliderect(sprite.rect):
+            if sprite != self and self.rect and self.rect.colliderect(sprite.rect):
                 sprite.kill()
                 self.kill()

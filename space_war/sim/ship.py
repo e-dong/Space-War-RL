@@ -5,7 +5,7 @@ import platform
 import uuid
 from pathlib import Path
 from threading import Thread
-from typing import Union
+from typing import Union, Optional
 
 import pygame
 
@@ -108,15 +108,15 @@ class BaseShip(SpaceEntity):
     player_id: int
     torpedo_group: pygame.sprite.Group
     phaser_group: pygame.sprite.GroupSingle
-    phaser: pygame.sprite.Sprite
-    phaser_last_fired: int
-    torpedo_last_fired: int
+    phaser: Optional[pygame.sprite.Sprite]
+    phaser_last_fired: Optional[int]
+    torpedo_last_fired: Optional[int]
 
     def __init__(
         self,
         player_id: int,
         image_path: Path,
-        start_pos: tuple[int, int],
+        start_pos: tuple[float, float],
         start_ang: float,
     ) -> None:
         super().__init__(
@@ -170,6 +170,7 @@ class BaseShip(SpaceEntity):
         for sprite in target_group.sprites():
             if (
                 sprite != self
+                and self.rect
                 and self.rect.colliderect(sprite.rect)
                 and sprite.entity_type == SpaceEntityType.SHIP
             ):
@@ -216,11 +217,11 @@ class HumanShip(BaseShip):
 
     """
 
-    rotate_cc_repeat_event: pygame.USEREVENT
-    rotate_cw_repeat_event: pygame.USEREVENT
-    acc_repeat_event: pygame.USEREVENT
-    fire_torpedoes_repeat_event: pygame.USEREVENT
-    fire_phaser_repeat_event: pygame.USEREVENT
+    rotate_cc_repeat_event: int
+    rotate_cw_repeat_event: int
+    acc_repeat_event: int
+    fire_torpedoes_repeat_event: int
+    fire_phaser_repeat_event: int
 
     def __init__(
         self,

@@ -1,0 +1,9 @@
+{
+  "venvPath": ".",
+  "venv": "venv",
+  "include": [
+    "space_war"
+  ],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false
+}

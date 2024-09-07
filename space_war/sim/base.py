@@ -24,7 +24,7 @@ class SpaceEntity(pygame.sprite.Sprite):
 
     entity_type: SpaceEntityType
     surf: pygame.surface.Surface
-    pos: tuple[int, int]
+    pos: tuple[float, float]
     vel: tuple[float, float]
     ang: float
 
@@ -33,8 +33,8 @@ class SpaceEntity(pygame.sprite.Sprite):
         entity_type,
         surf,
         start_pos,
-        start_ang=0,
-        start_vel=(0, 0),
+        start_ang=0.0,
+        start_vel=(0.0, 0.0),
     ) -> None:
         pygame.sprite.Sprite.__init__(self)
         self.entity_type = entity_type
@@ -68,7 +68,8 @@ class SpaceEntity(pygame.sprite.Sprite):
         x_pos += x_vel
         y_pos += y_vel
         self.pos = (x_pos, y_pos)
-        self.rect.center = self.pos
+        if self.rect:
+            self.rect.center = self.pos
 
         # update rotation to surface
         self.ang %= 360

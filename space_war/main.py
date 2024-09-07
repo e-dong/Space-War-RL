@@ -3,6 +3,7 @@ import asyncio
 from pathlib import Path
 
 import pygame
+from typing import Type
 
 from space_war.sim.conf import (
     MAX_FPS,
@@ -32,9 +33,9 @@ def render_sprites(sprite_cfg, player_target_group, surface):
 
 
 def get_player_sprites(
-    pos_iter: list[tuple[int, int]],
-    ang_iter: list[int],
-    instance_iter: list[BaseShip],
+    pos_iter: list[tuple[float, float]],
+    ang_iter: list[float],
+    instance_iter: list[Type[BaseShip]],
 ) -> tuple[list[BaseShip], list[ShipSpriteConfig]]:
     """Initialize player sprites and returns a list of sprites and
     configuration
