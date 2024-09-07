@@ -33,17 +33,17 @@ def render_sprites(sprite_cfg, player_target_group, surface):
 
 
 def get_player_sprites(
-    pos_iter: list[tuple[float, float]],
-    ang_iter: list[float],
-    instance_iter: list[Type[BaseShip]],
+    pos_iter: list[tuple[int, int]],
+    ang_iter: list[int],
+    instance_iter: list[type[BaseShip]],
 ) -> tuple[list[BaseShip], list[ShipSpriteConfig]]:
     """Initialize player sprites and returns a list of sprites and
     configuration
     """
     sprites = []
     sprite_cfg = []
-    for player_id, instance in enumerate(instance_iter):
-        player_sprite = instance(
+    for player_id, ShipClass in enumerate(instance_iter):
+        player_sprite = ShipClass(
             player_id=player_id,
             image_path=Path(
                 "space_war", "sim", "assets", f"player_{player_id}.png"
@@ -67,12 +67,12 @@ def init():
         instance_iter=[HumanShip, BaseShip],
         pos_iter=[
             (
-                screen.get_width() / 4,
-                screen.get_height() / 4,
+                int(screen.get_width() / 4),
+                int(screen.get_height() / 4),
             ),
             (
-                screen.get_width() - screen.get_width() / 4,
-                screen.get_height() - screen.get_height() / 4,
+                int(screen.get_width() - screen.get_width() / 4),
+                int(screen.get_height() - screen.get_height() / 4),
             ),
         ],
         ang_iter=[0, 180],
