@@ -1,0 +1,7 @@
+[tool.pyright]
+
+venvPath = "."
+venv = "venv"
+executionEnvironments = [
+  { root = "." }
+]
